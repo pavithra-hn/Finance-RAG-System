@@ -1,0 +1,156 @@
+version: '3.8'
+
+services:
+  finance-rag:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: finance-rag-system
+    ports:
+      - "8501:8501"
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GOOGLE_MODEL=${GOOGLE_MODEL:-gemini-1.5-flash}
+      - MAX_DOCUMENTS=${MAX_DOCUMENTS:-100}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-all-MiniLM-L6-v2}
+      - DEFAULT_STOCK_PERIOD=${DEFAULT_STOCK_PERIOD:-1mo}
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+    volumes:
+      - ./documents:/app/documents:ro
+      - ./data:/app/data
+      - finance-rag-cache:/app/.streamlit
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - finance-rag-network
+    depends_on:
+      - redis
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional Redis for caching (uncomment if needed)
+  redis:
+    image: redis:7-alpine
+    container_name: finance-rag-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - finance-rag-network
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  # Optional Nginx reverse proxy (for production)
+  nginx:
+    image: nginx:alpine
+    container_name: finance-rag-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - finance-rag
+    restart: unless-stopped
+    networks:
+      - finance-rag-network
+    profiles:
+      - production
+
+volumes:
+  finance-rag-cache:
+    driver: local
+  redis-data:
+    driver: local
+
+networks:
+  finance-rag-network:
+    driver: bridge
+
+---
+
+# docker-compose.prod.yml (Production Configuration)
+version: '3.8'
+
+services:
+  finance-rag:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: finance-rag-prod
+    ports:
+      - "8501:8501"
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GOOGLE_MODEL=${GOOGLE_MODEL:-gemini-1.5-flash}
+      - MAX_DOCUMENTS=${MAX_DOCUMENTS:-500}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-all-MiniLM-L6-v2}
+      - DEFAULT_STOCK_PERIOD=${DEFAULT_STOCK_PERIOD:-1mo}
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - ENVIRONMENT=production
+    volumes:
+      - ./documents:/app/documents:ro
+      - finance-rag-data:/app/data
+      - finance-rag-logs:/app/logs
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      - finance-rag-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  redis:
+    image: redis:7-alpine
+    container_name: finance-rag-redis-prod
+    volumes:
+      - redis-prod-data:/data
+    restart: always
+    networks:
+      - finance-rag-network
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+volumes:
+  finance-rag-data:
+    driver: local
+  finance-rag-logs:
+    driver: local
+  redis-prod-data:
+    driver: local
+
+networks:
+  finance-rag-network:
+    driver: bridge
