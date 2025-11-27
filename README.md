@@ -13,13 +13,13 @@
 
 ## 🌟 Overview
 
-The **Finance RAG System** is an intelligent financial analysis platform that combines document processing, real-time stock data, and AI-powered insights to provide comprehensive financial analysis. Built with modern technologies like FAISS for vector search, OpenAI GPT for intelligent responses, and Streamlit for an intuitive user interface.
+The **Finance RAG System** is an intelligent financial analysis platform that combines document processing, real-time stock data, and AI-powered insights to provide comprehensive financial analysis. Built with modern technologies like FAISS for vector search, Google Gemini for intelligent responses, and Streamlit for an intuitive user interface.
 
 ### 🎯 What it Does
 
 - **📄 Document Intelligence**: Processes PDF and TXT financial documents using semantic embeddings
 - **📈 Real-time Stock Data**: Integrates with Yahoo Finance for live market data and interactive charts
-- **🤖 AI-Powered Analysis**: Uses OpenAI GPT to generate intelligent financial insights
+- **🤖 AI-Powered Analysis**: Uses Google Gemini to generate intelligent financial insights
 - **💬 Conversational Interface**: Chat-based interaction for natural financial queries
 - **🔍 Smart Search**: FAISS-powered vector search for relevant document retrieval
 
@@ -32,7 +32,7 @@ The **Finance RAG System** is an intelligent financial analysis platform that co
 - ✅ **Real-time Stock Data Integration** (Yahoo Finance API)
 - ✅ **Semantic Search** with FAISS vector database
 - ✅ **Interactive Stock Charts** with Plotly visualizations
-- ✅ **AI-Powered Response Generation** with OpenAI GPT
+- ✅ **AI-Powered Response Generation** with Google Gemini
 - ✅ **Smart Query Detection** (stock vs document queries)
 - ✅ **Conversational Chat Interface** with Streamlit
 
@@ -56,7 +56,7 @@ graph TB
     C -->|Stock Query| D[Stock Data Handler<br/>Yahoo Finance]
     C -->|Document Query| E[Vector Store<br/>FAISS]
     E --> F[Document Processor<br/>Sentence Transformers]
-    D --> G[LLM Handler<br/>OpenAI GPT]
+    D --> G[LLM Handler<br/>Google Gemini]
     F --> G
     G --> H[Response Generation]
     H --> A
@@ -75,7 +75,7 @@ graph TB
 | **Document Processing** | Sentence Transformers | Text embedding generation |
 | **Vector Search** | FAISS | Similarity search and retrieval |
 | **Stock Data** | yfinance | Real-time financial data |
-| **AI Engine** | OpenAI GPT | Intelligent response generation |
+| **AI Engine** | Google Gemini | Intelligent response generation |
 | **Visualization** | Plotly | Interactive stock charts |
 
 ---
@@ -95,7 +95,7 @@ finance-rag-system/
 │   ├── 🔍 vector_store.py           # FAISS vector database
 │   ├── 🔄 query_processor.py        # Query processing & retrieval
 │   ├── 📈 stock_data.py             # Stock data & visualization
-│   ├── 🤖 llm_handler.py            # OpenAI API integration
+│   ├── 🤖 llm_handler.py            # Google Gemini API integration
 │   └── ⚙️ utils.py                  # Utility functions
 │
 ├── 📂 documents/                     # Financial documents
@@ -116,7 +116,7 @@ finance-rag-system/
 
 - **Python 3.9+**
 - **Docker** (optional, for containerized deployment)
-- **OpenAI API Key** (for AI-powered responses)
+- **Google Gemini** (for AI-powered responses)
 
 ### 🐍 Local Development Setup
 
@@ -140,8 +140,8 @@ finance-rag-system/
    # Copy environment template
    cp .env.example .env
    
-   # Edit .env and add your OpenAI API key
-   OPENAI_API_KEY=your_actual_api_key_here
+   # Edit .env and add your GOOGLE_API_KEY
+   GOOGLE_API_KEY=your_actual_api_key_here
    ```
 
 4. **Run the Application**
@@ -211,11 +211,11 @@ Create a `.env` file from the template:
 
 ```bash
 # Core Configuration
-OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_MODEL=gpt-3.5-turbo
+GOOGLE_API_KEY=your_google_api_key_here
+GOOGLE_MODEL=gemini-1.5-flash
 
 # Application Settings
-MAX_DOCUMENTS=100
+MAX_DOCUMENTS=100 
 EMBEDDING_MODEL=all-MiniLM-L6-v2
 DEFAULT_STOCK_PERIOD=1mo
 
@@ -264,7 +264,7 @@ REQUEST_TIMEOUT=30
 
 ### 🤖 AI-Powered Responses
 - **Context-Aware**: Combines document content with stock data
-- **Fallback Mode**: Works without OpenAI API (limited functionality)
+- **Fallback Mode**: Works without Google Gemini API (limited functionality)
 - **Smart Prompting**: Optimized prompts for financial analysis
 
 ---
@@ -339,14 +339,14 @@ docker-compose -f docker-compose.prod.yml logs -f
 
 ### Common Issues
 
-**1. OpenAI API Key Issues**
+**1. Google API Key Issues**
 ```bash
 # Check API key configuration
-grep OPENAI_API_KEY .env
+grep GOOGLE_API_KEY .env
 
 # Verify API key is valid
 curl -H "Authorization: Bearer YOUR_API_KEY" \
-     https://api.openai.com/v1/models
+     https://api.googleapis.com/v1/models
 ```
 
 **2. Document Processing Errors**
@@ -393,18 +393,6 @@ EMBEDDING_MODEL=all-mpnet-base-v2
 # Enable persistent caching
 ENABLE_CACHING=true
 CACHE_TIMEOUT=600
-```
-
-### For Better Response Times
-```bash
-# Optimize API calls
-OPENAI_MAX_TOKENS=500
-REQUEST_TIMEOUT=20
-
-# Reduce vector search results
-VECTOR_SEARCH_TOP_K=3
-```
-
 ---
 
 ## 🔄 API Reference
@@ -417,8 +405,8 @@ VECTOR_SEARCH_TOP_K=3
 ### Environment Variables Reference
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `OPENAI_API_KEY` | `required` | OpenAI API key |
-| `OPENAI_MODEL` | `gpt-3.5-turbo` | OpenAI model to use |
+| `GOOGLE_API_KEY` | `required` | Google API key |
+| `GOOGLE_MODEL` | `gemini-1.5-flash` | Google model to use |
 | `MAX_DOCUMENTS` | `100` | Maximum documents to process |
 | `EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | Sentence transformer model |
 | `DEFAULT_STOCK_PERIOD` | `1mo` | Default stock data period |
@@ -464,7 +452,7 @@ We welcome contributions! Here's how to get started:
 - ✅ Initial release
 - ✅ Document processing with PDF/TXT support
 - ✅ Real-time stock data integration
-- ✅ OpenAI GPT integration
+- ✅ Google Gemini integration
 - ✅ Interactive Streamlit interface
 - ✅ Docker containerization
 - ✅ Vector search with FAISS
